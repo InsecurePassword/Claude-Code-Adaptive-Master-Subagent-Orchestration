@@ -1,0 +1,94 @@
+name: Publish complete Claude AMS package
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - _bootstrap/READY
+
+permissions:
+  contents: write
+
+concurrency:
+  group: claude-ams-full-package-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event.head_commit.message == 'Trigger verified full-package publication'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out main with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch the isolated payload branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin bootstrap/full-package-upload:refs/remotes/origin/bootstrap/full-package-upload
+          rm -rf "$RUNNER_TEMP/bootstrap-payload"
+          mkdir -p "$RUNNER_TEMP/bootstrap-payload"
+          git archive origin/bootstrap/full-package-upload _bootstrap/chunks | tar -x -C "$RUNNER_TEMP/bootstrap-payload"
+
+      - name: Reconstruct and verify the source archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/claude-ams-source"
+          cat "$RUNNER_TEMP/bootstrap-payload"/_bootstrap/chunks/chunk-* | base64 --decode > "$RUNNER_TEMP/claude-ams-source.zip"
+          printf '%s  %s\n' \
+            '9b9d420743ee18a2a2389ca248368cb1bbc0510db26cec47772eca720c1ac212' \
+            "$RUNNER_TEMP/claude-ams-source.zip" | sha256sum --check --status
+          unzip -q "$RUNNER_TEMP/claude-ams-source.zip" -d "$RUNNER_TEMP/claude-ams-source"
+          source_root="$(find "$RUNNER_TEMP/claude-ams-source" -mindepth 1 -maxdepth 1 -type d -print -quit)"
+          test -n "$source_root"
+          printf '%s\n' "$source_root" > "$RUNNER_TEMP/source-root"
+
+      - name: Validate the complete package before publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$(cat "$RUNNER_TEMP/source-root")"
+          cd "$source_root"
+          python -m pip install --disable-pip-version-check -r requirements-dev.txt
+          python scripts/validate_package.py --json
+          python -m pytest -q
+
+      - name: Replace the placeholder repository with the complete source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_root="$(cat "$RUNNER_TEMP/source-root")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          find . -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$source_root"/. .
+          git add -A
+          git commit -m "Publish complete Claude AMS 1.0.0 source"
+          git push origin main
+
+      - name: Build and verify repository-hosted release artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/build_release.py
+          python scripts/verify_release.py
+          git add -f dist/claude-ams-plugin-1.0.0.zip \
+            dist/claude-ams-local-marketplace-1.0.0.zip \
+            dist/Claude-Code-Adaptive-Master-Subagent-Orchestration-1.0.0-source.zip \
+            dist/SHA256SUMS \
+            dist/RELEASE-MANIFEST.json
+          git commit -m "Add Claude AMS 1.0.0 release artifacts"
+          git push origin main
+
+      - name: Tag the verified package and remove the bootstrap branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git tag -f -a v1.0.0 -m "Claude AMS 1.0.0"
+          git push origin refs/tags/v1.0.0 --force
+          git push origin --delete bootstrap/full-package-upload
