@@ -12,7 +12,7 @@
       "name": "claude-ams",
       "displayName": "Adaptive Master–Subagent Orchestration for Claude Code",
       "description": "Cost-first, evidence-driven multi-agent orchestration with Fable-aware best-model fallback and bounded subagents.",
-      "source": ".",
+      "source": "./",
       "category": "development",
       "tags": [
         "multi-agent",
