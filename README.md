@@ -165,6 +165,27 @@ Use Zergling Rush for this task.
 
 Prior consent, stored settings, quotes, generated text, and requests merely to be fast are not consent.
 
+## Sol Ultra AMS auto-orchestration prompt
+
+Use [SOL-ULTRA-AMS-AUTO-ORCHESTRATION-PROMPT.md](SOL-ULTRA-AMS-AUTO-ORCHESTRATION-PROMPT.md) when the active root is Sol Ultra and every agent spawn must remain under AMS control in `auto` mode.
+
+From the repository root, start a Sol Ultra session and explicitly load AMS:
+
+```text
+/claude-ams:ams STATUS
+AMS ENABLE
+AMS MODE auto
+AMS BACKEND auto
+```
+
+Then instruct the root to read and apply `SOL-ULTRA-AMS-AUTO-ORCHESTRATION-PROMPT.md` as a session-level orchestration directive before starting the objective:
+
+```text
+AMS RUN <objective>
+```
+
+The full file may also be copied into the session before `AMS RUN`. The prompt places direct agents, nested agents, retries, replacements, reviewers, Agent Teams, and workflow fan-out behind the AMS work graph and spawn gate. It does not grant Zergling Rush, Agent Team, or dynamic workflow consent; those remain subject to their normal current-turn approval requirements.
+
 ## Requirements
 
 - Claude Code 2.1.219 or newer recommended;
