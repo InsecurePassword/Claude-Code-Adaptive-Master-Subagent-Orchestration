@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:claude-ams:schema:recovery:1",
+  "title": "Claude AMS recovery ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "objectiveId",
+    "objective",
+    "acceptanceCriteria",
+    "settingsSource",
+    "intensity",
+    "backend",
+    "workOrders",
+    "ownership",
+    "acceptedEvidence",
+    "pendingIntegration",
+    "blockers",
+    "nextAction"
+  ],
+  "properties": {
+    "schema": { "const": "claude-ams.recovery.v1" },
+    "objectiveId": { "type": "string" },
+    "objective": { "type": "string", "minLength": 1 },
+    "acceptanceCriteria": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "settingsSource": { "enum": ["project", "global", "explicit", "none"] },
+    "intensity": { "enum": ["minimal", "balanced", "auto", "heavy", "extreme", "zergling-rush"] },
+    "backend": { "enum": ["direct", "nested", "team", "workflow", "mixed"] },
+    "workOrders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "logicalParent", "role", "status", "requestedRoute", "ownership"],
+        "properties": {
+          "id": { "type": "string" },
+          "logicalParent": { "type": "string" },
+          "role": { "enum": ["worker", "delegated-manager"] },
+          "status": { "enum": ["ready", "active", "complete", "accepted", "rejected", "blocked", "failed", "superseded"] },
+          "requestedRoute": { "enum": ["haiku", "sonnet", "opus", "inherit"] },
+          "physicalIdentity": { "type": ["string", "null"] },
+          "ownership": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "supersedes": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "ownership": { "type": "object", "additionalProperties": { "type": "string" } },
+    "acceptedEvidence": { "type": "array", "items": { "type": "string" } },
+    "rejectedEvidence": { "type": "array", "items": { "type": "string" } },
+    "pendingIntegration": { "type": "array", "items": { "type": "string" } },
+    "validationState": { "type": "array", "items": { "type": "string" } },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "nextAction": { "type": "string", "minLength": 1 },
+    "resumptionCondition": { "type": "string" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

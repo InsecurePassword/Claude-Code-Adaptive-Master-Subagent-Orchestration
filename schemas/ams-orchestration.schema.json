@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:claude-ams:schema:orchestration:1",
+  "title": "Claude AMS orchestration settings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "enabled",
+    "allowImplicitInvocation",
+    "intensity",
+    "backend",
+    "features",
+    "limits",
+    "isolation"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "enabled": { "type": "boolean" },
+    "allowImplicitInvocation": { "type": "boolean" },
+    "intensity": {
+      "enum": ["minimal", "balanced", "auto", "heavy", "extreme"]
+    },
+    "backend": {
+      "enum": ["auto", "subagents", "teams", "workflow"]
+    },
+    "features": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nestedSubagents", "agentTeams", "dynamicWorkflows"],
+      "properties": {
+        "nestedSubagents": { "enum": ["auto", "off"] },
+        "agentTeams": { "type": "boolean" },
+        "dynamicWorkflows": { "type": "boolean" }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxConcurrentSubagents",
+        "maxSubagentsPerObjective",
+        "maxLogicalDepth",
+        "maxWorkflowAgents"
+      ],
+      "properties": {
+        "maxConcurrentSubagents": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "maxSubagentsPerObjective": { "type": "integer", "minimum": 1, "maximum": 200 },
+        "maxLogicalDepth": { "type": "integer", "minimum": 1, "maximum": 2 },
+        "maxWorkflowAgents": { "type": "integer", "minimum": 1, "maximum": 16 }
+      }
+    },
+    "isolation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["worktrees", "requireCheckpointForUncommittedDependencies"],
+      "properties": {
+        "worktrees": { "type": "boolean" },
+        "requireCheckpointForUncommittedDependencies": { "type": "boolean" }
+      }
+    }
+  }
+}

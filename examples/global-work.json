@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "enabled": true,
+  "allowImplicitInvocation": true,
+  "intensity": "balanced",
+  "backend": "subagents",
+  "features": {
+    "nestedSubagents": "off",
+    "agentTeams": false,
+    "dynamicWorkflows": false
+  },
+  "limits": {
+    "maxConcurrentSubagents": 3,
+    "maxSubagentsPerObjective": 24,
+    "maxLogicalDepth": 1,
+    "maxWorkflowAgents": 8
+  },
+  "isolation": {
+    "worktrees": true,
+    "requireCheckpointForUncommittedDependencies": true
+  }
+}

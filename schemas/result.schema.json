@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:claude-ams:schema:result:1",
+  "title": "Claude AMS result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "workOrderId",
+    "logicalParent",
+    "role",
+    "status",
+    "requestedRoute",
+    "observedModel",
+    "summary",
+    "evidence",
+    "filesChanged",
+    "validation",
+    "deviations",
+    "unresolvedIssues",
+    "risks",
+    "recommendedParentAction"
+  ],
+  "properties": {
+    "workOrderId": { "type": "string" },
+    "logicalParent": { "type": "string" },
+    "role": { "enum": ["worker", "delegated-manager"] },
+    "status": { "enum": ["complete", "partial", "blocked", "failed"] },
+    "requestedRoute": { "enum": ["haiku", "sonnet", "opus", "inherit"] },
+    "observedModel": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "filesChanged": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "commit": { "type": ["string", "null"] },
+    "worktree": { "type": ["string", "null"] },
+    "validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command", "status"],
+        "properties": {
+          "command": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["passed", "failed", "not-run", "inconclusive"] },
+          "exitCode": { "type": ["integer", "null"] },
+          "relevantOutput": { "type": "string" }
+        }
+      }
+    },
+    "deviations": { "type": "array", "items": { "type": "string" } },
+    "unresolvedIssues": { "type": "array", "items": { "type": "string" } },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "risks": { "type": "array", "items": { "type": "string" } },
+    "recommendedParentAction": { "type": "string", "minLength": 1 },
+    "managerAddendum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["descendants", "acceptedEvidence", "rejectedEvidence", "outstandingEvidence", "remainingAllocation", "ownershipReturned"],
+      "properties": {
+        "descendants": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "acceptedEvidence": { "type": "array", "items": { "type": "string" } },
+        "rejectedEvidence": { "type": "array", "items": { "type": "string" } },
+        "outstandingEvidence": { "type": "array", "items": { "type": "string" } },
+        "remainingAllocation": { "type": "integer", "minimum": 0 },
+        "ownershipReturned": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "role": { "const": "delegated-manager" } } },
+      "then": { "required": ["managerAddendum"] }
+    }
+  ]
+}

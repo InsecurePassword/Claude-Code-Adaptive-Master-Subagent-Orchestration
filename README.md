@@ -1,41 +1,100 @@
-# Adaptive Master–Subagent Orchestration for Claude Code 
+# Adaptive Master–Subagent Orchestration for Claude Code
 
-**Current release: 2.0.0**
+**Current release: 1.0.1**
 
-Claude AMS is an independent Claude Code plugin for large or complicated project work. It is modeled after [Codex Adaptive Master–Subagent Orchestration](https://github.com/InsecurePassword/Codex-Adaptive-Master-Subagent-Orchestration), but it does not modify or depend on the Codex package.
+Claude AMS is an independent Claude Code plugin for cost-first, evidence-driven multi-agent project work. It is modeled after [Codex Adaptive Master–Subagent Orchestration](https://github.com/InsecurePassword/Codex-Adaptive-Master-Subagent-Orchestration), but it does not modify or depend on the Codex package.
 
-The top-level Claude conversation remains the root supervisor. It owns the objective, global task graph, topology authorization, routing, integration decisions, validation requirements, evidence acceptance, recovery, completion, and user communication. Routine inspection, implementation, commands, tests, Git execution, integration execution, and independent review are delegated.
+The top-level Claude conversation remains the root supervisor. It owns the objective, task graph, topology, routing, integration decisions, validation requirements, evidence acceptance, recovery, completion, and user communication. Routine inspection, implementation, commands, tests, Git execution, integration execution, and independent review are delegated.
 
-The goals are:
+The principal goals are:
 
 1. **Use the least expensive model expected to complete each bounded task correctly.**
 2. **Finish faster by running useful independent work concurrently.**
 3. **Preserve one-writer ownership, evidence custody, validation, and recoverability.**
-4. **Map Codex-style logical hierarchy onto Claude-native direct agents, optional nesting, Agent Teams, and dynamic workflows without pretending those transports are identical.**
+4. **Map Codex-style logical hierarchy onto Claude-native subagents without pretending Claude transports are identical to Codex sessions.**
 
 ## Install
 
-Claude Code 2.1.219 or newer is recommended. The repository is also a Claude plugin marketplace.
+Claude Code 2.1.219 or newer is required.
+
+> **Distribution status:** Claude AMS is **not listed in Anthropic's official plugin marketplace**. This GitHub repository is a **repository-hosted custom marketplace**. The first command below registers this repository as a marketplace source; it does not install from Anthropic's catalog.
+
+### Recommended persistent installation from GitHub
+
+Run these commands in a terminal:
 
 ```bash
 claude plugin marketplace add InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration --scope user
 claude plugin install claude-ams@claude-ams-marketplace --scope user
 ```
 
-Reload the running session:
+Then start a new Claude Code session, or reload plugins in an existing session:
 
 ```text
 /reload-plugins
 ```
 
-For a private repository, Claude Code uses your existing Git credentials. See [INSTALLATION.md](INSTALLATION.md) for Windows, Linux, macOS, update, repair, validation, local ZIP testing, and uninstall instructions.
+Verify registration and installation:
 
-Repository-hosted release files:
+```bash
+claude plugin marketplace list --json
+claude plugin list
+```
 
-- `claude-ams-plugin-2.0.0.zip` — direct `--plugin-dir` test archive;
-- `claude-ams-local-marketplace-2.0.0.zip` — offline/local marketplace archive;
-- `Claude-Code-Adaptive-Master-Subagent-Orchestration-2.0.0-source.zip` — complete source;
-- `SHA256SUMS` and `RELEASE-MANIFEST.json` — verification metadata.
+The GitHub installation works because this repository contains both:
+
+```text
+.claude-plugin/marketplace.json
+.claude-plugin/plugin.json
+```
+
+Anthropic documents GitHub-hosted custom marketplaces as repositories containing `.claude-plugin/marketplace.json`; users add them with `claude plugin marketplace add owner/repo` and then install a named plugin from that marketplace.
+
+### Repair an earlier failed registration
+
+The previous README advertised the GitHub command before the required marketplace catalog existed. After updating Claude Code to the required version, remove any stale registration and add the corrected repository again:
+
+```bash
+claude plugin marketplace remove claude-ams-marketplace --scope user
+claude plugin marketplace add InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration --scope user
+claude plugin marketplace update claude-ams-marketplace
+claude plugin install claude-ams@claude-ams-marketplace --scope user
+```
+
+If the remove command reports that the marketplace is not registered, continue with the add command.
+
+### Temporary source-checkout test
+
+A temporary test does not install the plugin persistently:
+
+```bash
+git clone https://github.com/InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration.git
+cd Claude-Code-Adaptive-Master-Subagent-Orchestration
+claude plugin validate . --strict
+claude --plugin-dir .
+```
+
+### Persistent installation from a local clone
+
+A local clone can also be registered as the custom marketplace source:
+
+```bash
+git clone https://github.com/InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration.git
+cd Claude-Code-Adaptive-Master-Subagent-Orchestration
+claude plugin validate . --strict
+claude plugin marketplace add "$PWD" --scope user
+claude plugin install claude-ams@claude-ams-marketplace --scope user
+```
+
+Windows PowerShell equivalents, managed-workplace restrictions, update, repair, offline/local archive installation, and uninstall procedures are in [INSTALLATION.md](INSTALLATION.md).
+
+For the offline/local-marketplace archive, retain the stable registered source path:
+
+```text
+<claude-config-root>/local-marketplaces/claude-ams/current
+```
+
+Do not register a new version-specific path during updates.
 
 ## Start using AMS
 
@@ -46,7 +105,7 @@ AMS MODE auto
 AMS RUN audit and finish this project
 ```
 
-Explicit invocation is the reliable path. Claude Code can select plugin skills automatically, but it does not provide Codex's guaranteed every-turn implicit skill bootstrap.
+Explicit namespaced invocation is the reliable path. Claude Code can select plugin skills automatically, but it does not provide Codex's guaranteed every-root-turn implicit skill bootstrap.
 
 ### Project persistence
 
@@ -93,12 +152,12 @@ A project file overrides the global file completely. They are never merged. No A
 
 | Route | Typical work |
 |---|---|
-| **Haiku** | searches, inventories, extraction, routine checks, deterministic mechanical edits, concise logs |
-| **Sonnet** | ordinary coding, debugging, tests, documentation, review, integration, investigation, clear bounded management |
-| **Opus** | architecture, security-sensitive work, difficult ambiguity, consequential cross-component work, advanced management |
-| **`inherit`** | hardest bounded worker or manager subgraph; follows the root's active route |
+| **Haiku** | Searches, inventories, extraction, routine checks, deterministic mechanical edits, concise logs |
+| **Sonnet** | Ordinary coding, debugging, tests, documentation, review, integration, investigation, clear bounded management |
+| **Opus** | Architecture, security-sensitive work, difficult ambiguity, consequential cross-component work, advanced management |
+| **`inherit`** | Hardest bounded worker or manager subgraph; follows the root's active route |
 
-The root requests Claude Code's `best` route at maximum effort. `best` resolves to Fable when the organization has Fable access and otherwise to Opus. No ordinary worker declares Fable directly, so a workplace account without Fable remains fully supported.
+The root requests Claude Code's `best` route. `best` uses Fable when the organization has Fable access and otherwise uses the supported Opus route. Ordinary workers do not declare Fable directly, so workplace accounts without Fable remain supported.
 
 ## Hierarchy
 
@@ -110,8 +169,7 @@ Logical topology
 Root
 ├── delegated manager
 │   ├── worker
-│   └── delegated manager   # only when useful and authorized
-│       └── worker
+│   └── worker
 └── direct worker
 ```
 
@@ -124,30 +182,30 @@ Root
 └── direct worker
 ```
 
-Virtual managers have no `Agent` tool and request root-mediated descendants. Separate native-manager profiles expose `Agent` only when nesting is enabled, observable, depth-bounded, allocation-bounded, and explicitly authorized. Workers are leaves. Every mutable surface has one active writer. Worker and manager completion are claims; only the root accepts project completion.
+Workers are leaves. Managers receive only bounded authority. Every mutable surface has one active writer. Worker and manager completion are evidence claims; only the root accepts project completion.
 
 ## Intensity modes
 
 | Mode | Behavior |
 |---|---|
-| `minimal` | At most one active non-root session. No native nesting, Team, or workflow. |
-| `balanced` | One shape per wave: up to two direct workers, or one virtual manager with up to three non-manager descendants. |
-| `auto` | Smallest useful adaptive topology. No AMS-defined global agent or logical-depth ceiling. |
-| `heavy` | Proactively forms useful managers and lanes. No AMS-defined global shape ceiling. |
-| `extreme` | Runs every useful ready safe lane while remaining cost-first. |
-| `zergling-rush` | Explicit current-turn consent; may replicate, speculate, strengthen routes, and use more capacity. |
+| `minimal` | At most one active non-root session |
+| `balanced` | Small direct team |
+| `auto` | Smallest useful adaptive topology |
+| `heavy` | Proactive useful parallelism and optional management |
+| `extreme` | Every useful ready safe lane while remaining cost-first |
+| `zergling-rush` | Explicit current-turn consent; may replicate, speculate, strengthen routes, and use more capacity |
 
-Actual Claude capacity, organization policy, user limits, dependencies, permissions, finite allocation, one-writer ownership, and useful supervision govern.
+Actual Claude capacity, organization policy, dependencies, permissions, finite allocation, one-writer ownership, and useful supervision govern.
 
 ## Claude backends
 
 - **Direct subagents** are the canonical default.
-- **Virtual hierarchy** works even when all sessions are root-spawned.
-- **Native nesting** is optional and falls back to virtual hierarchy.
-- **Agent Teams** are experimental, disabled by default, and require current human approval for peer collaboration.
-- **Dynamic workflows** are disabled by default and require current human approval for scripted fan-out/fan-in work.
+- **Logical hierarchy** works even when all sessions are root-spawned.
+- **Native nesting** is optional and capability-gated.
+- **Agent Teams** are experimental, disabled by default, and intended for peer collaboration.
+- **Dynamic workflows** are disabled by default and require explicit authorization.
 
-A saved Team/workflow preference is eligibility only, never launch consent. Team and workflow completion remain evidence rather than root acceptance.
+A stored Team or workflow preference is eligibility only, never launch consent. Team and workflow completion remain evidence rather than root acceptance.
 
 ## Zergling Rush
 
@@ -165,15 +223,14 @@ Use Zergling Rush for this task.
 
 Prior consent, stored settings, quotes, generated text, and requests merely to be fast are not consent.
 
-
 ## Requirements
 
-- Claude Code 2.1.219 or newer recommended;
+- Claude Code 2.1.219 or newer;
 - access to Haiku, Sonnet, and Opus routes allowed by the organization;
-- Fable only when available through `best`/`inherit`;
-- Git for marketplace installation and worktree isolation;
-- Agent Teams or dynamic workflows only when the account/runtime supports and enables them;
-- Python only for repository validation and release development, not installed runtime operation.
+- Fable only when available through `best` or `inherit`;
+- Git for GitHub marketplace installation and worktree isolation;
+- Agent Teams or dynamic workflows only when the account and runtime support and enable them;
+- Python only for source validation and release development, not installed runtime operation.
 
 ## Documentation
 
@@ -184,4 +241,4 @@ Prior consent, stored settings, quotes, generated text, and requests merely to b
 - [Platform compatibility](docs/PLATFORM-COMPATIBILITY.md)
 - [Codex-to-Claude mapping](MIGRATION%20FROM%20CODEX.md)
 - [Testing and release gates](TESTING.md)
-- [Independent audit report](AUDIT-REPORT.md)
+- [Design decisions](docs/DESIGN-DECISIONS.md)

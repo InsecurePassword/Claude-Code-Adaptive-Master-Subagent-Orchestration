@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "claude-ams",
+  "displayName": "Adaptive Master–Subagent Orchestration for Claude Code",
+  "version": "1.0.1",
+  "description": "Cost-first, evidence-driven multi-agent orchestration for Claude Code with Fable-aware best-model fallback, bounded subagents, safe parallelism, and durable recovery.",
+  "author": {
+    "name": "InsecurePassword"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "claude-code",
+    "multi-agent",
+    "orchestration",
+    "subagents",
+    "cost-control",
+    "fable"
+  ],
+  "defaultEnabled": true,
+  "homepage": "https://github.com/InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration#readme",
+  "repository": "https://github.com/InsecurePassword/Claude-Code-Adaptive-Master-Subagent-Orchestration"
+}
