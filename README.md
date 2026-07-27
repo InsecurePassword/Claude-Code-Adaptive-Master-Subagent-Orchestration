@@ -1,4 +1,4 @@
-# Adaptive Master–Subagent Orchestration for Claude Code
+# Adaptive Master–Subagent Orchestration for Claude Code 
 
 **Current release: 2.0.0**
 
